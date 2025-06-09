@@ -1,0 +1,127 @@
+<div class="container mx-auto p-4">
+  <p-toast></p-toast>
+  <h2 class="text-2xl font-semibold mb-4">{{ isEditMode ? 'Editar Evento' : 'Adicionar Evento' }}</h2>
+
+  <form [formGroup]="eventoForm" (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+
+    <!-- Mensagem de erro geral -->
+    @if (errorMessage) {
+      <div class="mb-6">
+        <p-message severity="error" [text]="errorMessage" [escape]="false" styleClass="w-full"></p-message>
+      </div>
+    }
+
+    <!-- Campo Descrição -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="descricao">Descrição</label>
+      <input id="descricao" pInputText formControlName="descricao" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Digite a descrição do evento" />
+      <div class="mt-2">
+        <app-message [control]="eventoForm.get('descricao')" error="required" text="Descrição é obrigatória."></app-message>
+        <app-message [control]="eventoForm.get('descricao')" error="minlength" text="Descrição deve ter no mínimo 5 caracteres."></app-message>
+      </div>
+    </div>
+
+    <!-- Linha com Datas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <!-- Data do Evento -->
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="data_input">Data do Evento</label>
+        <p-datePicker id="data" formControlName="data" dateFormat="dd/mm/yy" [showIcon]="true" inputId="data_input" styleClass="w-full" inputStyleClass="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="dd/mm/aaaa" appendTo="body"></p-datePicker>
+        <div class="mt-2">
+          <app-message [control]="eventoForm.get('data')" error="required" text="Data é obrigatória."></app-message>
+        </div>
+      </div>
+      <!-- Início Inscrições -->
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="inicio_input">Início Inscrições</label>
+        <p-datePicker id="data_inicio_inscricoes" formControlName="data_inicio_inscricoes" dateFormat="dd/mm/yy" [showTime]="true" hourFormat="24" [showIcon]="true" inputId="inicio_input" styleClass="w-full" inputStyleClass="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="dd/mm/aaaa hh:mm" appendTo="body"></p-datePicker>
+        <div class="mt-2">
+          <app-message [control]="eventoForm.get('data_inicio_inscricoes')" error="required" text="Data de início das inscrições é obrigatória."></app-message>
+        </div>
+      </div>
+      <!-- Fim Inscrições -->
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="fim_input">Fim Inscrições</label>
+        <p-datePicker id="data_final_inscricoes" formControlName="data_final_inscricoes" dateFormat="dd/mm/yy" [showTime]="true" hourFormat="24" [showIcon]="true" inputId="fim_input" styleClass="w-full" inputStyleClass="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="dd/mm/aaaa hh:mm" appendTo="body"></p-datePicker>
+        <div class="mt-2">
+          <app-message [control]="eventoForm.get('data_final_inscricoes')" error="required" text="Data final das inscrições é obrigatória."></app-message>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linha com Números e Cortesias -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 items-start">
+      <!-- Número de Inscrições -->
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="num_insc_input">Nº Máx. Inscrições</label>
+        <p-inputNumber id="numero_inscricoes" formControlName="numero_inscricoes" mode="decimal" [showButtons]="true" [min]="1" inputId="num_insc_input" styleClass="w-full" inputStyleClass="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Nº máximo de inscrições"></p-inputNumber>
+        <div class="mt-2">
+          <app-message [control]="eventoForm.get('numero_inscricoes')" error="required" text="Número de inscrições é obrigatório."></app-message>
+          <app-message [control]="eventoForm.get('numero_inscricoes')" error="min" text="Deve ser no mínimo 1."></app-message>
+        </div>
+      </div>
+
+      <!-- Valor do Evento -->
+      <div>
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="valor">Valor (R$)</label>
+        <input id="valor" type="text" inputmode="decimal" formControlName="valor" currencyMask [options]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left', precision: 2, nullable: true }" class="w-full p-inputtext p-component shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Ex: 50,00" />
+        <div class="mt-2">
+          <app-message [control]="eventoForm.get('valor')" error="required" text="Valor é obrigatório."></app-message>
+        </div>
+      </div>
+
+      <!-- Cortesias Checkbox e Número de Cortesias (Condicional) -->
+      <div class="col-span-1 md:col-span-1">
+        <div class="flex items-center mt-8">
+           <p-checkbox id="cortesias" formControlName="cortesias" [binary]="true" inputId="cortesias_input"></p-checkbox>
+           <label for="cortesias_input" class="ml-2 text-sm font-medium text-gray-700">Oferece Cortesias?</label>
+        </div>
+        <div *ngIf="showNumeroCortesia" class="mt-3">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="num_cort_input">Nº Cortesias</label>
+          <p-inputNumber id="numero_cortesia" formControlName="numero_cortesia" mode="decimal" [showButtons]="true" [min]="1" inputId="num_cort_input" styleClass="w-full" inputStyleClass="w-full shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Número de cortesias"></p-inputNumber>
+          <div class="mt-2">
+            <app-message [control]="eventoForm.get('numero_cortesia')" error="required" text="Número de cortesias é obrigatório."></app-message>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campo Link Obrigado -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="link_obrigado">Link Página de Obrigado</label>
+      <input id="link_obrigado" pInputText formControlName="link_obrigado" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="https://...">
+      <div class="mt-2">
+        <app-message [control]="eventoForm.get('link_obrigado')" error="required" text="Link é obrigatório."></app-message>
+        <app-message [control]="eventoForm.get('link_obrigado')" error="pattern" text="Formato de URL inválido."></app-message>
+      </div>
+    </div>
+
+    <!-- Campo URL Amigável -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="url">URL Amigável do Evento</label>
+      <input id="url" pInputText formControlName="url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="https://seusite.com/nome-do-evento">
+      <div class="mt-2">
+        <app-message [control]="eventoForm.get('url')" error="required" text="URL é obrigatória."></app-message>
+        <app-message [control]="eventoForm.get('url')" error="pattern" text="Formato de URL inválido."></app-message>
+      </div>
+    </div>
+
+    <!-- Botões -->
+    <div class="flex items-center justify-between mt-8">
+      <button pButton
+              type="submit"
+              [label]="isEditMode ? 'Salvar Alterações' : 'Criar Evento'"
+              [loading]="isLoading"
+              [disabled]="eventoForm.invalid || isLoading || eventoForm.pristine"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+      </button>
+      <button pButton
+              type="button"
+              (click)="cancel()"
+              class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+        Cancelar
+      </button>
+    </div>
+
+  </form>
+</div> 

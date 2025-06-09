@@ -1,0 +1,22 @@
+/* Estilos controlados pelo Tailwind CSS e pelo tema PrimeNG */
+
+/* Hack para tentar corrigir o posicionamento do ícone do p-password */
+/* :host ::ng-deep garante que o estilo possa penetrar na encapsulação do componente */
+:host ::ng-deep .p-password .p-input-icon-right {
+  /* Garantir que o container do ícone esteja posicionado relativamente se necessário */
+  position: relative;
+}
+
+:host ::ng-deep .p-password .p-input-icon-right > .p-password-icon {
+  position: absolute; /* Posicionamento absoluto dentro do container */
+  top: 50%;
+  right: 0.75rem; /* Ajustar conforme necessário - padrão costuma ser ~0.5-1rem */
+  transform: translateY(-50%);
+  margin-top: 0; /* Resetar qualquer margem padrão */
+  cursor: pointer;
+}
+
+/* Opcional: Ajustar o padding do input para não sobrepor o ícone, se necessário */
+/* :host ::ng-deep .p-password input.p-inputtext {
+  padding-right: 2.5rem;
+} */

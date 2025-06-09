@@ -1,0 +1,11 @@
+<header class="bg-white p-4 shadow-sm flex justify-between items-center">
+  <h1 class="text-xl font-semibold text-gray-700">Meu Painel</h1>
+  <!-- TODO: Adicionar logo, menu do usuário, notificações, etc. -->
+
+  <!-- Nome do Usuário -->
+  <div *ngIf="userName$ | async as name" class="text-gray-600">
+    Olá, {{ name }}
+    <!-- TODO: Adicionar dropdown com Logout aqui -->
+  </div>
+
+</header>

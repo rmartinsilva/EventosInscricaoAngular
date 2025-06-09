@@ -1,0 +1,102 @@
+<div class="container mx-auto p-4">
+  <!-- <p-toast></p-toast> -->
+  <!-- <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog> -->
+
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-semibold">Lista de Eventos</h2>
+    <button pButton 
+            type="button" 
+            label="Novo Evento" 
+            icon="pi pi-plus" 
+            (click)="navigateToNovo()" 
+            *ngIf="authService.hasPermission('create_eventos')"></button>
+  </div>
+
+  <!-- Mensagem de erro (se necessário, como em usuario-list) -->
+  <!-- <p-message *ngIf="errorMessage && !loading" severity="error" [text]="errorMessage"></p-message> -->
+
+  <p-table #dtEventos 
+           [value]="eventos" 
+           [lazy]="true" 
+           (onLazyLoad)="loadEventos($event)" 
+           [paginator]="true" 
+           [rows]="rowsPerPage" 
+           [totalRecords]="totalRecords" 
+           [loading]="loading" 
+           [rowsPerPageOptions]="[5, 10, 20, 50]"
+           dataKey="codigo" 
+           styleClass="p-datatable-striped p-datatable-gridlines mb-10"
+           responsiveLayout="scroll"
+           paginatorPosition="bottom"
+           [showCurrentPageReport]="true"
+           currentPageReportTemplate="Exibindo {first} até {last} de {totalRecords} resultados"
+           [globalFilterFields]="['descricao']">
+    
+    <ng-template pTemplate="caption">
+      <div class="flex justify-between items-center">
+        <h4 class="m-0">Gerenciar Eventos</h4>
+        <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search mr-2"></i>
+            <input pInputText type="text" #gb (input)="applyFilterGlobal($event, 'contains')" placeholder="Buscar..." /> 
+        </span>
+      </div>
+    </ng-template>
+    
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Descrição</th>
+        <th>Data</th>
+        <th>Início Inscrições</th>
+        <th>Fim Inscrições</th>
+        <th>Nº Inscrições</th>
+        <th>Cortesias</th>
+        <th style="width: 15%; min-width: 10rem; text-align: center;">Ações</th>
+      </tr>
+    </ng-template>
+    
+    <ng-template pTemplate="body" let-evento>
+      <tr>
+        <td>{{ evento.descricao }}</td>
+        <td>{{ evento.data | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ evento.data_inicio_inscricoes | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ evento.data_final_inscricoes | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ evento.numero_inscricoes }}</td>
+        <td>{{ evento.cortesias ? 'Sim' : 'Não' }}</td>
+        <td style="text-align: center;">
+          <button pButton 
+                  icon="pi pi-pencil" 
+                  class="p-button-rounded p-button-info mr-2"
+                  (click)="navigateToEditar(evento.codigo)" 
+                  *ngIf="authService.hasPermission('update_eventos')"
+                  tooltip="Editar"
+                  tooltipPosition="top"></button>
+          <button pButton 
+                  icon="pi pi-trash" 
+                  class="p-button-rounded p-button-danger" 
+                  (click)="confirmDelete(evento)" 
+                  *ngIf="authService.hasPermission('delete_eventos')"
+                  tooltip="Excluir"
+                  tooltipPosition="top"></button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+          <td [attr.colspan]="7" class="text-center p-4">
+              Nenhum evento encontrado.
+          </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="loadingbody">
+      <tr>
+          <td [attr.colspan]="7" class="text-center p-4">
+              <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i><br>
+              Carregando eventos...
+          </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+</div> 

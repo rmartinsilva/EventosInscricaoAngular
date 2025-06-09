@@ -1,0 +1,84 @@
+<aside class="h-full flex flex-col bg-gray-800 text-gray-100 shadow-lg">
+  <!-- Logo/Título do Painel (Exemplo) -->
+  <div class="p-4 border-b border-gray-700">
+    <h2 class="text-xl font-semibold text-white">Meu Painel</h2>
+  </div>
+
+  <!-- Itens do Menu -->
+  <nav class="flex-1 p-4 space-y-2">
+    <a routerLink="/painel/home" routerLinkActive="bg-gray-700 text-white" [routerLinkActiveOptions]="{ exact: true }"
+      class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+      <i class="pi pi-home mr-3"></i> <!-- Ícone Home -->
+      Home
+    </a>
+    <!-- Link de Usuários condicional -->
+    <a *ngIf="canViewUsuarios" routerLink="/painel/usuarios" routerLinkActive="bg-gray-700 text-white"
+      class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+      <i class="pi pi-users mr-3"></i> <!-- Ícone Usuários -->
+      Usuários
+    </a>
+    <!-- Link de Grupos condicional -->
+    @if (canViewGrupos) {
+    <a routerLink="/painel/grupos" routerLinkActive="bg-gray-700 text-white"
+      class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+      <i class="pi pi-th-large mr-3"></i> <!-- Ícone Grupos -->
+      Grupos
+    </a>
+    }
+    <!-- Link de Acessos condicional -->
+    <a *ngIf="canViewAcessos" routerLink="/painel/acessos" routerLinkActive="bg-gray-700 text-white"
+      class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+      <i class="pi pi-key mr-3"></i> <!-- Ícone Acessos (exemplo: pi-key) -->
+      Acessos
+    </a>
+    <!-- Link de Permissões do Grupo condicional -->
+    @if (canConfigureGrupoPermissoes) {
+    <a routerLink="/painel/permissoes-grupo" routerLinkActive="bg-gray-700 text-white"
+      class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+      <i class="pi pi-shield mr-3"></i> <!-- Ícone Permissões (exemplo: pi-shield) -->
+      Permissões do Grupo
+    </a>
+    }
+    <!-- Link de Configurações -->
+    @if (canViewConfiguracoes) {
+    <a routerLink="/painel/configuracoes" routerLinkActive="bg-gray-700 text-white"
+      class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+      <i class="pi pi-cog mr-3"></i> <!-- Ícone Configurações -->
+      Configurações
+    </a>
+    }
+
+    @if (canViewEventos) {
+    <!-- Link de Eventos -->
+    <a routerLink="/painel/eventos" routerLinkActive="bg-gray-700 text-white"
+      class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+      <i class="pi pi-calendar mr-3"></i> <!-- Ícone Eventos -->
+      Eventos
+    </a>
+    }
+    <!-- Link de Inscrições condicional -->
+    @if (canViewInscricoes) {
+      <a routerLink="/painel/inscricoes" routerLinkActive="bg-gray-700 text-white"
+        class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+        <i class="pi pi-id-card mr-3"></i> <!-- Ícone Inscrições (exemplo) -->
+        Inscrições
+      </a>
+    }
+    <!-- Novo Item de Menu para Relatório de Inscrições -->
+    <li *ngIf="canViewRelatorioInscricoes">
+      <a routerLink="/painel/relatorios/inscricoes" routerLinkActive="bg-gray-700" class="flex items-center px-4 py-2 mt-2 text-gray-100 hover:bg-gray-700">
+        <i class="pi pi-chart-bar mr-2"></i> Rel. Inscrições
+      </a>
+    </li>
+    <!-- Adicionar mais links aqui -->
+  </nav>
+
+  <!-- Botão Sair -->
+  <div class="p-4 border-t border-gray-700 mt-auto">
+    <button (click)="logout()"
+      class="flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-red-600 hover:text-white">
+      <i class="pi pi-sign-out mr-3"></i> <!-- Ícone Sair -->
+      Sair
+    </button>
+  </div>
+</aside>

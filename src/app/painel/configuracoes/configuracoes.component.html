@@ -1,0 +1,57 @@
+<div class="container mx-auto p-4">
+  <h2 class="text-2xl font-semibold mb-4">Configurações Gerais</h2>
+
+  <form [formGroup]="configForm" (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    @if (errorMessage) {
+      <div class="mb-6">
+        <p-message severity="error" 
+                   [text]="errorMessage"
+                   [escape]="false"
+                   styleClass="w-full">
+        </p-message>
+      </div>
+    }
+
+    <!-- Campo Descrição da API -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="descricao_api">Descrição da API</label>
+      <input type="text"
+             id="descricao_api"
+             pInputText
+             formControlName="descricao_api"
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+             placeholder="Ex: Mercado Pago">
+      <div class="mt-2">
+        <app-message [control]="configForm.get('descricao_api')" error="required" text="A descrição da API é obrigatória."></app-message>
+      </div>
+    </div>
+
+    <!-- Campo Chave da API -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="chave_api">Chave da API</label>
+      <input type="text"
+             id="chave_api"
+             pInputText
+             formControlName="chave_api"
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+             placeholder="Ex: sk_live_...">
+       <div class="mt-2">
+        <app-message [control]="configForm.get('chave_api')" error="required" text="A chave da API é obrigatória."></app-message>
+      </div>
+    </div>
+
+    <!-- Botão Salvar -->
+    <div class="flex items-center justify-between mt-6">
+      <button pButton
+              type="submit"
+              label="Salvar Configurações"
+              [loading]="isLoading"
+              [disabled]="configForm.invalid || isLoading || !configForm.dirty"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+      </button>
+      <!-- Não há botão de cancelar explicitamente neste formulário, 
+           mas mantendo o div flex para consistência caso seja adicionado no futuro -->
+    </div>
+
+  </form>
+</div> 

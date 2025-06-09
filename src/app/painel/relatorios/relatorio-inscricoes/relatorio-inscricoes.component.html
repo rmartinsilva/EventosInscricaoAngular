@@ -1,0 +1,103 @@
+<div class="container mx-auto p-4">
+  <p-toast></p-toast>
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-semibold">Relatório de Inscrições</h2>
+  </div>
+
+  <div class="mb-6 p-fluid grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+    <div>
+      <label for="filtroEventoRelatorio" class="block text-sm font-medium text-gray-700 mb-1">Evento*</label>
+      <p-dropdown id="filtroEventoRelatorio"
+                  [options]="eventosParaFiltro"
+                  [(ngModel)]="eventoSelecionado"
+                  optionLabel="descricao"
+                  placeholder="Selecione um evento"
+                  [showClear]="true"
+                  (onChange)="onEventoChange()"
+                  styleClass="w-full"
+                  filter="true"
+                  filterBy="descricao"
+                  [disabled]="loading">
+      </p-dropdown>
+    </div>
+    <div>
+      <label for="filtroCortesiaRelatorio" class="block text-sm font-medium text-gray-700 mb-1">Cortesia</label>
+      <p-dropdown id="filtroCortesiaRelatorio"
+                  [options]="opcoesFiltroCortesia"
+                  [(ngModel)]="filtroCortesiaSelecionado"
+                  optionLabel="label"
+                  (onChange)="onCortesiaChange()"
+                  styleClass="w-full"
+                  [disabled]="!eventoSelecionado || loading">
+      </p-dropdown>
+    </div>
+  </div>
+
+  <p-table #dtRelatorio
+           [value]="inscricoes"
+           [loading]="loading"
+           [paginator]="false" [rows]="rows" [totalRecords]="totalRecords"
+           [rowsPerPageOptions]="rowsPerPageOptions" responsiveLayout="scroll"
+           dataKey="codigo"
+           styleClass="p-datatable-striped p-datatable-gridlines"
+           currentPageReportTemplate="Exibindo {first} a {last} de {totalRecords} inscrições"
+           [showCurrentPageReport]="true">
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 70px;">#</th>
+        <th>Participante</th>
+        <th style="width: 150px;">Data Inscrição</th>
+        <th style="width: 100px; text-align: center;">Cortesia</th>
+        <th style="width: 150px;">Status</th>
+        <th style="width: 180px;">Forma Pagamento</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-inscricao let-i="rowIndex">
+      <tr>
+        <td>{{ inscricao.codigo }}</td>
+        <td>{{ getNomeParticipante(inscricao.participante) }}</td>
+        <td>{{ inscricao.data | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td style="text-align: center;">
+          <i class="pi" [ngClass]="{
+               'pi-check-circle text-green-500': inscricao.cortesia === true,
+               'pi-times-circle text-red-500': inscricao.cortesia === false,
+               'pi-question-circle text-gray-400': inscricao.cortesia !== true && inscricao.cortesia !== false
+             }"
+             [pTooltip]="inscricao.cortesia === true ? 'Sim' : (inscricao.cortesia === false ? 'Não' : 'Não Informado')" tooltipPosition="top"></i>
+        </td>
+        <td>
+          <span [ngClass]="{
+            'text-green-600 font-semibold': inscricao.status === 'C' || inscricao.status === 'P',
+            'text-orange-500': inscricao.status === 'A',
+            'text-red-600': inscricao.status === 'X',
+            'text-gray-500': !['C','P','A','X'].includes(inscricao.status)
+          }">
+            {{ inscricao.status === 'C' ? 'Cortesia' :
+               inscricao.status === 'P' ? 'Paga' :
+               inscricao.status === 'A' ? 'Aguardando Pag.' :
+               inscricao.status === 'X' ? 'Cancelada' :
+               inscricao.status }}
+          </span>
+        </td>
+        <td>{{ inscricao.forma_pagamento }}</td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="text-center p-5">
+          <div *ngIf="!eventoSelecionado && !loading">Selecione um evento para visualizar as inscrições.</div>
+          <div *ngIf="eventoSelecionado && !loading && totalRecords === 0">Nenhuma inscrição encontrada para os filtros selecionados.</div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="loadingbody">
+        <tr>
+            <td colspan="6" class="text-center p-5">
+                <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i><br>
+                Carregando inscrições...
+            </td>
+        </tr>
+    </ng-template>
+  </p-table>
+</div> 

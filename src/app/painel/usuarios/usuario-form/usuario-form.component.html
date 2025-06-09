@@ -1,0 +1,164 @@
+<div class="container mx-auto p-4">
+  
+  <h2 class="text-2xl font-semibold mb-4">{{ usuario ? 'Editar Usuário' : 'Adicionar Usuário' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    @if (errorMessage) {
+      <div class="mb-6">
+        <p-message severity="error" 
+                   [text]="errorMessage" 
+                   [escape]="false">
+        </p-message>
+      </div>
+    }
+
+    <!-- Campo Name -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+        Nome
+      </label>
+      <input pInputText 
+             formControlName="name" 
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+             id="name" 
+             type="text" 
+             placeholder="Nome Completo">
+      <div class="mt-2">
+        <app-message 
+          [control]="form.get('name')"
+          [error]="'required'"
+          text="Nome é obrigatório."
+        ></app-message>
+        <app-message 
+          [control]="form.get('name')"
+          [error]="'minlength'"
+          text="Nome deve ter no mínimo 3 caracteres."
+        ></app-message>
+      </div>
+    </div>
+
+    <!-- Campo Login -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="login">
+        Login
+      </label>
+      <input pInputText 
+             formControlName="login" 
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+             id="login" 
+             type="text" 
+             placeholder="Login de acesso">
+      <div class="mt-2">
+        <app-message 
+          [control]="form.get('login')"
+          [error]="'required'"
+          text="Login é obrigatório."
+        ></app-message>
+      </div>
+    </div>
+
+    <!-- Campo Password -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+        Senha {{ usuario ? '(Deixe em branco para não alterar)' : '' }}
+      </label>
+      <div class="relative rounded-md shadow-sm">
+        <input [type]="showPassword ? 'text' : 'password'" 
+               pInputText 
+               formControlName="password" 
+               class="block w-full rounded-md border-0 px-3 py-2 pr-10 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6" 
+               id="password" 
+               placeholder="******************">
+        <button type="button" 
+                (click)="togglePasswordVisibility()" 
+                aria-label="Mostrar/ocultar senha"
+                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700">
+          <i class="pi" [ngClass]="showPassword ? 'pi-eye-slash' : 'pi-eye'"></i>
+        </button>
+      </div>
+      <div class="mt-2">
+        <app-message 
+          *ngIf="!usuario"
+          [control]="form.get('password')"
+          [error]="'required'"
+          text="Senha é obrigatória para novos usuários."
+        ></app-message>
+        <app-message 
+          [control]="form.get('password')"
+          [error]="'minlength'"
+          text="Senha deve ter no mínimo 6 caracteres."
+        ></app-message>
+      </div>
+    </div>
+
+    <!-- Campo Confirmar Senha -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="confirmarSenha">
+        Confirmar Senha
+      </label>
+      <div class="relative rounded-md shadow-sm">
+        <input [type]="showPassword ? 'text' : 'password'" 
+               pInputText 
+               formControlName="confirmarSenha" 
+               class="block w-full rounded-md border-0 px-3 py-2 pr-10 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6" 
+               id="confirmarSenha" 
+               placeholder="******************">
+      </div>
+      <div class="mt-2">
+        <app-message 
+          *ngIf="!usuario"
+          [control]="form.get('confirmarSenha')"
+          [error]="'required'"
+          text="Confirmação de senha é obrigatória."
+        ></app-message>
+        <app-message 
+          *ngIf="form.errors?.['senhasNaoCoincidem'] && form.get('confirmarSenha')?.touched"
+          text="As senhas não coincidem"
+          severity="error"
+          [showAlways]="true"
+        ></app-message>
+      </div>
+    </div>
+
+    <!-- Botões -->
+    <div class="flex items-center justify-between">
+      <button pButton 
+              [disabled]="form.get('name')?.invalid || form.get('login')?.invalid" 
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" 
+              type="submit">
+        {{ usuario ? 'Salvar Alterações' : 'Criar Usuário' }}
+      </button>
+      <button pButton 
+              type="button" 
+              (click)="router.navigate(['/painel/usuarios'])" 
+              class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+        Cancelar
+      </button>
+    </div>
+  </form>
+
+  <!-- Seção de Grupos (apenas na edição) -->
+  <div *ngIf="usuario" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 mt-8">
+    <h3 class="text-xl font-semibold mb-4">Grupos do Usuário</h3>
+    <div class="flex gap-2 mb-4 items-center">
+      <p-select [options]="gruposDisponiveis" [(ngModel)]="selectedGrupo" optionLabel="descricao" placeholder="Selecione um grupo" [ngModelOptions]="{standalone: true}" class="w-full md:w-1/2"></p-select>
+      <button pButton label="Adicionar Grupo" icon="pi pi-plus" (click)="addGrupo()" [disabled]="!selectedGrupo"></button>
+    </div>
+    <p-table [value]="usuarioGrupos" [paginator]="false">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Grupo</th>
+          <th>Ações</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-grupoUsuario>
+        <tr>
+          <td>{{ findGrupoDescricao(grupoUsuario.grupo.id) }}</td>
+          <td>
+            <button pButton icon="pi pi-trash" class="p-button-danger" (click)="removeGrupo(grupoUsuario)"></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

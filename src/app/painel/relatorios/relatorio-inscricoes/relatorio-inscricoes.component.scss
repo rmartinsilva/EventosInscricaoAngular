@@ -1,0 +1,31 @@
+/* Estilos para RelatorioInscricoesComponent */
+:host ::ng-deep .p-dropdown {
+  width: 100%; // Ocupa toda a largura da coluna do grid
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  white-space: nowrap;
+}
+
+:host ::ng-deep .p-toast {
+  margin-top: 1rem;
+  z-index: 1100; // Garantir que o toast fique sobre outros elementos
+}
+
+// Alinhar verticalmente o label e o dropdown no grid
+.p-fluid .grid .p-field > label {
+  margin-bottom: 0.5rem; /* Espaço entre label e dropdown */
+}
+
+.p-fluid .grid .p-field {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) { // md breakpoint
+  .md\:grid-cols-2 > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Alinha o dropdown na parte inferior se o label for menor */
+  }
+} 

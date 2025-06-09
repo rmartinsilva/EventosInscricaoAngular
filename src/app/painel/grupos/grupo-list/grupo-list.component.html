@@ -1,0 +1,70 @@
+<div class="container mx-auto p-4">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-semibold">Lista de Grupos</h2>
+    <button pButton type="button" label="Novo Grupo" icon="pi pi-plus" (click)="navigateToForm()" *ngIf="canCreate" [disabled]="isLoading"></button>
+  </div>
+
+  <!-- Mensagem de erro global -->
+  <p-message *ngIf="errorMessage && !isLoading" severity="error" [text]="errorMessage"></p-message>
+
+  <p-table 
+    #dtGrupos
+    [value]="grupos" 
+    [lazy]="true" 
+    (onLazyLoad)="loadGrupos($event)" 
+    [paginator]="true" 
+    [rows]="rowsPerPage" 
+    [totalRecords]="totalRecords" 
+    [loading]="isLoading"
+    [rowsPerPageOptions]="[5, 10, 20, 50]" 
+    dataKey="id"
+    styleClass="p-datatable-striped p-datatable-gridlines mb-10"
+    responsiveLayout="scroll"
+    paginatorPosition="bottom"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Exibindo {first} até {last} de {totalRecords} resultados"
+    [globalFilterFields]="['descricao']"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex justify-between items-center">
+        <h4 class="m-0">Gerenciar Grupos</h4>
+        <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search mr-2"></i>
+            <input pInputText type="text" #gb (input)="applyFilterGlobal($event, 'contains')" placeholder="Buscar..." />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th >Descrição</th>
+        <th style="width: 15%; min-width: 10rem; text-align: center;">Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-grupo>
+      <tr>
+        <td>{{ grupo.descricao }}</td>
+        <td style="text-align: center;">
+          <button pButton type="button" icon="pi pi-pencil" class="p-button-rounded p-button-info mr-2" (click)="editGrupo(grupo.id)" *ngIf="canEdit" [disabled]="isLoading"></button>
+          <button pButton type="button" icon="pi pi-trash" class="p-button-rounded p-button-danger" (click)="deleteGrupo(grupo.id)" *ngIf="canDelete" [disabled]="isLoading"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="2" class="text-center p-4">
+          Nenhum grupo encontrado.
+        </td>
+      </tr>
+    </ng-template>
+     <ng-template pTemplate="loadingbody">
+        <tr>
+            <td [attr.colspan]="2" class="text-center p-4">
+                <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i><br>
+                Carregando grupos...
+            </td>
+        </tr>
+    </ng-template>
+  </p-table>
+
+  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+</div> 

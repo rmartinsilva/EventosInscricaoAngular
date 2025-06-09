@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Aplicar gradiente ao body */
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-blue-50 via-white to-blue-100 min-h-screen;
+  }
+}
+
+/* Estilos globais adicionais podem vir aqui */
+
+/* Estilos para formatar a lista de erros dentro do p-message */
+.p-message .p-message-text {
+  display: block; /* Ou flex com flex-direction: column, se preferir */
+}
+
+.p-message .p-message-text p {
+  margin-top: 0; /* Evitar margem dupla se o p-message já tiver padding */
+  margin-bottom: 0.5em;
+}
+
+.p-message .p-message-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* Garante que o parágrafo único (sem lista depois) não tenha margem inferior desnecessária */
+.p-message .p-message-text p:only-child {
+  margin-bottom: 0;
+}
+
+.p-message .p-message-text ul {
+  display: block;
+  list-style-type: disc;
+  margin-top: 0.5em; /* Espaço entre o <p> e o <ul> se ambos existirem */
+  margin-bottom: 0;
+  padding-left: 20px; /* Indentação para marcadores */
+}
+
+.p-message .p-message-text li {
+  display: list-item;
+  margin-bottom: 0.25em;
+}
+
+.p-message .p-message-text li:last-child {
+  margin-bottom: 0;
+}
+
+/* Se a mensagem principal for um parágrafo e for seguida por uma lista, 
+   o <br> que o ErrorHandlerService adiciona pode ser desnecessário 
+   pois <p> e <ul> são elementos de bloco. 
+   No entanto, o ErrorHandlerService atualmente não adiciona <br> nessa situação.
+   O espaçamento é controlado por margens do <p> e <ul>. */

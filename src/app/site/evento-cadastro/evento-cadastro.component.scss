@@ -1,0 +1,70 @@
+/* Estilos para EventoCadastroComponent */ 
+:host ::ng-deep {
+  // Para garantir que o container principal do componente não tenha margens/paddings inesperados
+  .evento-cadastro-container {
+    // Exemplo: padding: 0;
+  }
+
+  // Estilos para a etapa de pagamento
+  .payment-step-container {
+    // O container já usa surface-ground, p-4 etc. do PrimeFlex.
+    // O card interno já tem max-width e margin auto.
+  }
+
+  .payment-option {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+    border-color: var(--surface-300); // Define uma cor de borda padrão mais visível
+    
+    // As classes hover:shadow-4 e shadow-2/shadow-3 no HTML agora controlam as sombras.
+    // Mantemos o transform para um leve efeito de "levantar" no hover e seleção.
+    &:hover:not(.bg-primary-reverse) { 
+        transform: translateY(-3px);
+    }
+
+    &.bg-primary-reverse { // Estado selecionado
+        transform: translateY(-2px); 
+    }
+
+    .pi {
+      transition: color 0.2s ease-in-out;
+    }
+  }
+
+  .payment-details {
+    background-color: var(--surface-50); // Usando variável de cor do PrimeNG
+    border: 1px solid var(--surface-200);
+
+    .qr-code-container img {
+      border-radius: 4px;
+      border: 1px solid var(--surface-300);
+    }
+    .select-all {
+      user-select: all;
+    }
+  }
+
+  .navigation-buttons {
+    // Pode adicionar um separador visual se desejar
+    // border-top: 1px solid var(--surface-border);
+    // padding-top: 1.5rem;
+    // margin-top: 1.5rem; // Ajuste do mt-6 do HTML se necessário
+  }
+
+  // Ajustes para campos de formulário dentro da tela de pagamento, se necessário
+  .card-form-container {
+    .field {
+      margin-bottom: 1rem; // Espaçamento padrão entre campos
+    }
+    label {
+        font-weight: 500; // Um pouco mais de destaque para as labels
+    }
+  }
+}
+
+// Garantir que o container principal do componente ocupe a largura disponível
+// e permita scroll se o conteúdo for maior que a viewport.
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100%; // Para ocupar a altura da tela se for o conteúdo principal
+} 

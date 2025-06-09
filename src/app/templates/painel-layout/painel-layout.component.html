@@ -1,0 +1,18 @@
+<div class="flex h-screen bg-gray-100">
+  <!-- Sidebar (Menu) -->
+  <app-menu-painel class="w-64 flex-shrink-0"></app-menu-painel>
+
+  <!-- Área Principal -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <app-header-painel class="shadow-md"></app-header-painel>
+
+    <!-- Conteúdo Principal (com scroll) -->
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 p-6">
+      <router-outlet></router-outlet> <!-- Onde as rotas filhas serão carregadas -->
+    </main>
+
+    <!-- Footer (Opcional, pode remover se não necessário no layout principal) -->
+    <app-footer-painel class="bg-white border-t"></app-footer-painel>
+  </div>
+</div>

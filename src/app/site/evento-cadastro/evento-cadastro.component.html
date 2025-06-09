@@ -1,0 +1,466 @@
+<!-- Conteúdo do HTML para EventoCadastroComponent -->
+<div class="container mx-auto p-4">
+  <!-- Loading state -->
+  <div *ngIf="loading" class="flex justify-center items-center min-h-[200px]">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+    <strong class="font-bold">Erro!</strong>
+    <span class="block sm:inline">{{ error }}</span>
+  </div>
+
+  <!-- Event data and Stepper -->
+  <div *ngIf="evento && !loading" class="bg-white shadow-lg rounded-lg p-6">
+    <h1 class="text-2xl font-bold mb-4">{{ evento.descricao }}</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <div class="space-y-2">
+        <p><strong>Data:</strong> {{ evento.data | date:'dd/MM/yyyy' }}</p>
+        <p><strong>Início das Inscrições:</strong> {{ evento.data_inicio_inscricoes | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p><strong>Fim das Inscrições:</strong> {{ evento.data_final_inscricoes | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+    </div>
+
+    <!-- Stepper -->
+    <p-stepper [linear]="true" [(value)]="activeStep">
+      <p-step-list>
+        <p-step [value]="1">Dados do Participante</p-step>
+        <p-step [value]="2">Pagamento</p-step>
+        <p-step [value]="3">Confirmação</p-step>
+      </p-step-list>
+
+      <p-step-panels>
+        <!-- ETAPA 1: DADOS DO PARTICIPANTE -->
+        <p-step-panel [value]="1">
+          <ng-template #content>
+
+            @if(numeroInscricao && numeroMaximoInscricoes && numeroInscricao >= numeroMaximoInscricoes && mensagemInscricaoExistente) {
+              <div class="col-12 mb-3">
+                <p-message severity="warn" summary="Inscrições Preenchidas" [text]="mensagemInscricaoExistente"
+                  styleClass="w-full" [escape]="false">
+                </p-message>
+              </div>
+            }
+
+            <form [formGroup]="participanteForm" class="space-y-4">
+              <!-- CPF Field -->
+              <div class="field">
+                <label for="cpf" class="block mb-2">CPF *</label>
+                <div class="relative">
+                  <p-inputMask id="cpf" formControlName="cpf" mask="999.999.999-99" placeholder="Digite seu CPF"
+                    (onInput)="onCpfChange($event)" [style]="{'width': '100%'}"
+                    [class.ng-invalid]="participanteForm.get('cpf')?.invalid && participanteForm.get('cpf')?.touched"></p-inputMask>
+                  <small *ngIf="participanteForm.get('cpf')?.invalid && participanteForm.get('cpf')?.touched"
+                    class="text-red-500">
+                    CPF é obrigatório
+                  </small>
+                  <div *ngIf="cpfLoading" class="absolute right-2 top-1/2 -translate-y-1/2">
+                    <p-progressSpinner [style]="{'width': '20px', 'height': '20px'}"
+                      strokeWidth="4"></p-progressSpinner>
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- MENSAGEM DE PARTICIPANTE JÁ INSCRITO -->
+
+              @if(participanteJaInscrito && mensagemInscricaoExistente) {
+              <div class="col-12 mb-3">
+                <p-message severity="info" summary="Inscrição Existente" [text]="mensagemInscricaoExistente"
+                  styleClass="w-full" [escape]="false">
+                </p-message>
+              </div>
+
+              }
+
+
+
+              <!-- FIM DA MENSAGEM -->
+
+              <!-- Other fields -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Nome -->
+                <div class="field">
+                  <label for="nome" class="block mb-2">Nome Completo *</label>
+                  <input id="nome" type="text" pInputText formControlName="nome" [style]="{'width': '100%'}">
+                  <small *ngIf="participanteForm.get('nome')?.invalid && participanteForm.get('nome')?.touched"
+                    class="text-red-500">Nome é obrigatório</small>
+                </div>
+
+                <!-- Email -->
+                <div class="field">
+                  <label for="email" class="block mb-2">E-mail</label>
+                  <input id="email" type="email" pInputText formControlName="email" [style]="{'width': '100%'}">
+                  <small
+                    *ngIf="participanteForm.get('email')?.hasError('email') && participanteForm.get('email')?.touched"
+                    class="text-red-500">E-mail inválido</small>
+                </div>
+
+                <!-- Data de Nascimento -->
+                <div class="field">
+                  <label for="data_nascimento" class="block mb-2">Data de Nascimento *</label>
+                  <p-datePicker id="data_nascimento" formControlName="data_nascimento" [showIcon]="true"
+                    dateFormat="dd/mm/yy" [style]="{'width': '100%'}" [inputStyle]="{'width': '100%'}"
+                    appendTo="body"></p-datePicker>
+                  <small
+                    *ngIf="participanteForm.get('data_nascimento')?.invalid && participanteForm.get('data_nascimento')?.touched"
+                    class="text-red-500">Data de nascimento é obrigatória</small>
+                </div>
+
+                <!-- Sexo -->
+                <div class="field">
+                  <label for="sexo" class="block mb-2">Sexo *</label>
+                  <p-select id="sexo" formControlName="sexo" [options]="[
+                      {label: 'Masculino', value: 'M'},
+                      {label: 'Feminino', value: 'F'}
+                    ]" placeholder="Selecione" [style]="{'width': '100%'}" appendTo="body"></p-select>
+                  <small *ngIf="participanteForm.get('sexo')?.invalid && participanteForm.get('sexo')?.touched"
+                    class="text-red-500">Sexo é obrigatório</small>
+                </div>
+
+                <!-- Telefone -->
+                <div class="field">
+                  <label for="telefone" class="block mb-2">Telefone *</label>
+                  <p-inputMask id="telefone" formControlName="telefone" mask="(99)99999-9999"
+                    placeholder="(00)00000-0000" [style]="{'width': '100%'}"></p-inputMask>
+                  <small *ngIf="participanteForm.get('telefone')?.invalid && participanteForm.get('telefone')?.touched"
+                    class="text-red-500">Telefone é obrigatório</small>
+                </div>
+
+                <!-- Cidade -->
+                <div class="field">
+                  <label for="cidade" class="block mb-2">Cidade *</label>
+                  <input id="cidade" type="text" pInputText formControlName="cidade" [style]="{'width': '100%'}">
+                  <small *ngIf="participanteForm.get('cidade')?.invalid && participanteForm.get('cidade')?.touched"
+                    class="text-red-500">Cidade é obrigatória</small>
+                </div>
+
+                <!-- Contato de Emergência -->
+                <div class="field">
+                  <label for="nome_contato_emergencia" class="block mb-2">Nome do Contato de Emergência *</label>
+                  <input id="nome_contato_emergencia" type="text" pInputText formControlName="nome_contato_emergencia"
+                    [style]="{'width': '100%'}">
+                  <small
+                    *ngIf="participanteForm.get('nome_contato_emergencia')?.invalid && participanteForm.get('nome_contato_emergencia')?.touched"
+                    class="text-red-500">Nome do contato é obrigatório</small>
+                </div>
+
+                <!-- Telefone de Emergência -->
+                <div class="field">
+                  <label for="numero_contato_emergencia" class="block mb-2">Telefone de Emergência *</label>
+                  <p-inputMask id="numero_contato_emergencia" formControlName="numero_contato_emergencia"
+                    mask="(99)99999-9999" placeholder="(00)00000-0000" [style]="{'width': '100%'}"></p-inputMask>
+                  <small
+                    *ngIf="participanteForm.get('numero_contato_emergencia')?.invalid && participanteForm.get('numero_contato_emergencia')?.touched"
+                    class="text-red-500">Telefone de emergência é obrigatório</small>
+                </div>
+              </div>
+
+              <!-- Checkboxes -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="field-checkbox">
+                  <p-checkbox id="participante_igreja" formControlName="participante_igreja"
+                    [binary]="true"></p-checkbox>
+                  <label for="participante_igreja" class="ml-2">É participante de igreja?</label>
+                </div>
+                <div class="field-checkbox">
+                  <p-checkbox id="usa_medicamento" formControlName="usa_medicamento" [binary]="true"></p-checkbox>
+                  <label for="usa_medicamento" class="ml-2">Usa medicamento?</label>
+                </div>
+              </div>
+
+              <!-- Campos condicionais -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="field" *ngIf="participanteForm.get('participante_igreja')?.value">
+                  <label for="qual_igreja" class="block mb-2">Qual igreja? <span
+                      *ngIf="participanteForm.get('participante_igreja')?.value">*</span></label>
+                  <input id="qual_igreja" type="text" pInputText formControlName="qual_igreja"
+                    [style]="{'width': '100%'}">
+                  <small
+                    *ngIf="participanteForm.get('qual_igreja')?.invalid && participanteForm.get('qual_igreja')?.touched && participanteForm.get('participante_igreja')?.value"
+                    class="text-red-500">Informe qual igreja</small>
+                </div>
+                <div class="field" *ngIf="participanteForm.get('usa_medicamento')?.value">
+                  <label for="qual_medicamento" class="block mb-2">Qual medicamento? <span
+                      *ngIf="participanteForm.get('usa_medicamento')?.value">*</span></label>
+                  <input id="qual_medicamento" type="text" pInputText formControlName="qual_medicamento"
+                    [style]="{'width': '100%'}">
+                  <small
+                    *ngIf="participanteForm.get('qual_medicamento')?.invalid && participanteForm.get('qual_medicamento')?.touched && participanteForm.get('usa_medicamento')?.value"
+                    class="text-red-500">Informe qual medicamento</small>
+                </div>
+              </div>
+
+              <!-- Botões de Ação da Etapa 1 -->
+              <div class="flex justify-end mt-6 space-x-2">
+                <p-button *ngIf="participanteEncontrado && participanteForm.pristine && canEditDetails && !participanteJaInscrito && !participanteListaEspera && !participanteNaListaDeEspera" 
+                  type="button"
+                  label="Avançar para Pagamento" 
+                  icon="pi pi-arrow-right" 
+                  iconPos="right" 
+                  (onClick)="avancarStep()"
+                  styleClass="p-button-secondary"></p-button>
+                
+                <p-button 
+                  type="button" 
+                  [label]="textoBotaoPrincipal" 
+                  icon="pi pi-save" 
+                  iconPos="right"
+                  (onClick)="salvarEAvancar()"
+                  [disabled]="!participanteForm.valid || (participanteEncontrado && participanteForm.pristine && !participanteForm.dirty && !participanteListaEspera) || !canEditDetails || cpfLoading">
+                </p-button>
+
+                <p-button 
+                  *ngIf="mostrarBotaoEntrarListaEspera"
+                  type="button"
+                  label="Entrar na Lista de Espera"
+                  icon="pi pi-users" 
+                  iconPos="right"
+                  (onClick)="entrarNaListaDeEspera()"
+                  styleClass="p-button-info"
+                  [disabled]="cpfLoading || participanteForm.dirty || !participanteEncontrado || !participanteEncontrado.codigo">
+                </p-button>
+
+                <p-button 
+                  *ngIf="participanteNaListaDeEspera && codigoListaEspera"
+                  type="button"
+                  label="Sair da Lista de Espera"
+                  icon="pi pi-sign-out" 
+                  iconPos="right"
+                  (onClick)="sairDaListaDeEspera()"
+                  styleClass="p-button-danger">
+                </p-button>
+              </div>
+            </form>
+          </ng-template>
+        </p-step-panel>
+
+        <!-- ETAPA 2: PAGAMENTO -->
+        <p-step-panel [value]="2">
+          <ng-template #content>
+            <div class="payment-step-container py-6">
+              <div class="surface-card p-4 md:p-6 shadow-2 border-round" style="max-width: 700px; margin: auto;">
+                <h2 class="text-2xl font-semibold mb-6 text-center text-primary">Etapa 2: Pagamento</h2>
+
+                <div class="mb-6">
+                  <p class="text-lg text-center text-700">Escolha sua forma de pagamento preferida.</p>
+                </div>
+
+                <div class="flex justify-content-center align-items-stretch gap-4 md:gap-6 mb-6">
+                  <div class="flex-1 min-w-0">
+                    <div (click)="selectPaymentMethod('pix')"
+                      class="payment-option surface-card p-4 border-round cursor-pointer transition-all transition-duration-200 text-center h-full"
+                      [ngClass]="selectedPaymentMethod === 'pix' 
+                                    ? 'border-4 border-blue-500 shadow-lg bg-blue-50' 
+                                    : 'border border-surface-300 hover:border-surface-400 hover:shadow-md'">
+                      <i class="pi pi-qrcode text-4xl mb-2"
+                        [ngClass]="selectedPaymentMethod === 'pix' ? 'text-blue-600' : 'text-700'"></i>
+                      <h3 class="text-xl font-medium"
+                        [ngClass]="selectedPaymentMethod === 'pix' ? 'text-blue-700' : 'text-800'">PIX</h3>
+                      <p class="text-sm" [ngClass]="selectedPaymentMethod === 'pix' ? 'text-blue-700' : 'text-600'">
+                        Rápido e fácil, pague usando o QR Code.</p>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div (click)="selectPaymentMethod('card')"
+                      class="payment-option surface-card p-4 border-round cursor-pointer transition-all transition-duration-200 text-center h-full"
+                      [ngClass]="selectedPaymentMethod === 'card' 
+                                    ? 'border-4 border-blue-500 shadow-lg bg-blue-50' 
+                                    : 'border border-surface-300 hover:border-surface-400 hover:shadow-md'">
+                      <i class="pi pi-credit-card text-4xl mb-2"
+                        [ngClass]="selectedPaymentMethod === 'card' ? 'text-blue-600' : 'text-700'"></i>
+                      <h3 class="text-xl font-medium"
+                        [ngClass]="selectedPaymentMethod === 'card' ? 'text-blue-700' : 'text-800'">Cartão de
+                        Crédito/Débito</h3>
+                      <p class="text-sm" [ngClass]="selectedPaymentMethod === 'card' ? 'text-blue-700' : 'text-600'">
+                        Pagamento seguro com seu cartão.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div *ngIf="selectedPaymentMethod" class="payment-details surface-50 p-4 border-round mb-6">
+                  <div *ngIf="selectedPaymentMethod === 'pix'">
+                    <h4 class="text-lg font-semibold mb-3 text-primary">Pagamento com PIX</h4>
+
+                    <!-- Botão para Gerar PIX -->
+                    <div *ngIf="!pixGeradoDados && !pixRequestLoading" class="text-center mb-4">
+                      <p class="text-700 mb-3">Clique abaixo para gerar as informações de pagamento PIX.</p>
+                      <button pButton type="button" label="Gerar Código PIX" icon="pi pi-qrcode"
+                        (click)="solicitarPixPagamento()" class="p-button-primary"></button>
+                    </div>
+
+                    <!-- Loading da Geração PIX -->
+                    <div *ngIf="pixRequestLoading" class="text-center mb-4">
+                      <p-progressSpinner [style]="{width: '50px', height: '50px'}" strokeWidth="4"
+                        animationDuration=".5s"></p-progressSpinner>
+                      <p class="text-700 mt-2">Gerando PIX, aguarde...</p>
+                    </div>
+
+                    <!-- Detalhes do PIX Gerado -->
+                    <div *ngIf="pixGeradoDados && !pixRequestLoading">
+                      <div class="qr-code-container text-center mb-3">
+                        <p class="text-700 mb-2">Escaneie o QR Code abaixo com o app do seu banco:</p>
+                        <!-- Assumindo que o backend retorna a imagem base64 em pixGeradoDados.qr_code_base64 -->
+                        <img *ngIf="pixGeradoDados.qr_code_base64"
+                          [src]="'data:image/png;base64,' + pixGeradoDados.qr_code_base64" alt="PIX QR Code"
+                          class="inline-block border-1 surface-border p-1" style="max-width:220px;">
+                        <p *ngIf="!pixGeradoDados.qr_code_base64 && pixGeradoDados.qr_code"
+                          class="text-700 text-orange-500">QR Code não disponível, utilize o código abaixo.</p>
+                      </div>
+                      <div class="pix-copia-e-cola-container mb-2">
+                        <p class="text-700">Ou utilize a chave PIX (copia e cola):
+                          <strong class="text-primary select-all break-all ml-1">{{ pixGeradoDados.qr_code }}</strong>
+                        </p>
+                      </div>
+                      <div class="text-center md:text-left mb-3">
+                        <button pButton type="button" icon="pi pi-copy" label="Copiar Código PIX"
+                          (click)="copiarCodigoPix()" class="p-button-sm p-button-outlined"
+                          [disabled]="!pixGeradoDados.qr_code"></button>
+                      </div>
+                      
+                      <div *ngIf="pixExpirationDate" class="expiration-timer my-3 p-3 bg-blue-50 border-1 border-blue-200 rounded-md text-center">
+                        <p class="text-sm text-blue-700 mb-1">
+                          <i class="pi pi-clock mr-1"></i> Este PIX expira em:
+                        </p>
+                        <p class="text-lg font-bold text-blue-800">
+                          {{ pixExpirationDate }}
+                        </p>
+                        <p *ngIf="isPollingPixStatus" class="text-xs text-blue-600 mt-1">
+                          Estamos verificando o pagamento automaticamente...
+                        </p>
+                      </div>
+
+                      <p class="text-sm text-orange-500 mt-2">Atenção: A inscrição só será confirmada após a aprovação do pagamento.</p>
+                    </div>
+                  </div>
+                  <div *ngIf="selectedPaymentMethod === 'card'">
+                    <h4 class="text-lg font-semibold mb-3 text-primary">Pagamento com Cartão</h4>
+                    <p class="text-700 mb-4">Por favor, preencha os dados do seu cartão. <br />(Esta é uma simulação,
+                      nenhum dado será processado ou armazenado).</p>
+                    <div class="card-form-container" [formGroup]="cardPaymentForm">
+                      <div class="p-fluid grid formgrid">
+                        <div class="field col-12">
+                          <label for="cardNumber" class="block text-sm font-medium text-700 mb-1">Número do Cartão
+                            *</label>
+                          <div class="relative">
+                            <input id="cardNumber" type="text" pInputText formControlName="cardNumber"
+                              placeholder="0000 0000 0000 0000" class="w-full"
+                              [ngClass]="{'ng-invalid ng-dirty': cardPaymentForm.get('cardNumber')?.invalid && cardPaymentForm.get('cardNumber')?.touched}">
+                            <span *ngIf="detectedCardBrand"
+                              class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold p-1 bg-gray-200 rounded">{{
+                              detectedCardBrand | uppercase }}</span>
+                          </div>
+                          <small
+                            *ngIf="cardPaymentForm.get('cardNumber')?.hasError('required') && cardPaymentForm.get('cardNumber')?.touched"
+                            class="text-red-500">Número do cartão é obrigatório.</small>
+                          <small
+                            *ngIf="cardPaymentForm.get('cardNumber')?.hasError('invalidCardNumber') && cardPaymentForm.get('cardNumber')?.touched && !cardPaymentForm.get('cardNumber')?.hasError('required')"
+                            class="text-red-500">Número do cartão inválido.</small>
+                        </div>
+                        <div class="field col-12 md:col-6">
+                          <label for="cardExpiry" class="block text-sm font-medium text-700 mb-1">Validade (MM/AA)
+                            *</label>
+                          <p-inputMask id="cardExpiry" formControlName="cardExpiry" mask="99/99" placeholder="MM/AA"
+                            styleClass="w-full"
+                            [ngClass]="{'ng-invalid ng-dirty': cardPaymentForm.get('cardExpiry')?.invalid && cardPaymentForm.get('cardExpiry')?.touched}"></p-inputMask>
+                          <small
+                            *ngIf="cardPaymentForm.get('cardExpiry')?.hasError('required') && cardPaymentForm.get('cardExpiry')?.touched"
+                            class="text-red-500">Validade é obrigatória.</small>
+                          <small
+                            *ngIf="cardPaymentForm.get('cardExpiry')?.hasError('invalidCardExpiry') && cardPaymentForm.get('cardExpiry')?.touched && !cardPaymentForm.get('cardExpiry')?.hasError('required')"
+                            class="text-red-500">Data de validade inválida.</small>
+                        </div>
+                        <div class="field col-12 md:col-6">
+                          <label for="cardCvc" class="block text-sm font-medium text-700 mb-1">CVV *</label>
+                          <p-inputMask id="cardCvc" formControlName="cardCvc" mask="999?9" placeholder="123"
+                            styleClass="w-full"
+                            [ngClass]="{'ng-invalid ng-dirty': cardPaymentForm.get('cardCvc')?.invalid && cardPaymentForm.get('cardCvc')?.touched}"></p-inputMask>
+                          <small
+                            *ngIf="cardPaymentForm.get('cardCvc')?.hasError('required') && cardPaymentForm.get('cardCvc')?.touched"
+                            class="text-red-500">CVV é obrigatório.</small>
+                          <small
+                            *ngIf="cardPaymentForm.get('cardCvc')?.hasError('invalidCardCvc') && cardPaymentForm.get('cardCvc')?.touched && !cardPaymentForm.get('cardCvc')?.hasError('required')"
+                            class="text-red-500">CVV inválido.</small>
+                        </div>
+                        <div class="field col-12">
+                          <label for="cardHolderName" class="block text-sm font-medium text-700 mb-1">Nome no Cartão
+                            *</label>
+                          <input id="cardHolderName" type="text" pInputText formControlName="cardHolderName"
+                            placeholder="Nome Completo" class="w-full"
+                            [ngClass]="{'ng-invalid ng-dirty': cardPaymentForm.get('cardHolderName')?.invalid && cardPaymentForm.get('cardHolderName')?.touched}">
+                          <small
+                            *ngIf="cardPaymentForm.get('cardHolderName')?.invalid && cardPaymentForm.get('cardHolderName')?.touched"
+                            class="text-red-500">Nome no cartão é obrigatório.</small>
+                        </div>
+
+                        <!-- Novos campos para Documento -->
+                        <div class="field col-12 md:col-6">
+                          <label for="cardholderDocType" class="block text-sm font-medium text-700 mb-1">Tipo de
+                            Documento *</label>
+                          <p-select id="cardholderDocType" formControlName="cardholderDocType"
+                            [options]="identificationTypes" placeholder="Selecione o tipo" optionLabel="label"
+                            optionValue="value" [style]="{'width': '100%'}"
+                            [ngClass]="{'ng-invalid ng-dirty': cardPaymentForm.get('cardholderDocType')?.invalid && cardPaymentForm.get('cardholderDocType')?.touched}"
+                            appendTo="body">
+                          </p-select>
+                          <small
+                            *ngIf="cardPaymentForm.get('cardholderDocType')?.invalid && cardPaymentForm.get('cardholderDocType')?.touched"
+                            class="text-red-500">Tipo de documento é obrigatório.</small>
+                        </div>
+
+                        <div class="field col-12 md:col-6">
+                          <label for="cardholderDocNumber" class="block text-sm font-medium text-700 mb-1">Número do
+                            Documento *</label>
+                          <!-- Usar p-inputMask se quiser máscara para CPF/CNPJ, ou input simples -->
+                          <input id="cardholderDocNumber" type="text" pInputText formControlName="cardholderDocNumber"
+                            placeholder="Número do documento" class="w-full"
+                            [ngClass]="{'ng-invalid ng-dirty': cardPaymentForm.get('cardholderDocNumber')?.invalid && cardPaymentForm.get('cardholderDocNumber')?.touched}">
+                          <small
+                            *ngIf="cardPaymentForm.get('cardholderDocNumber')?.hasError('required') && cardPaymentForm.get('cardholderDocNumber')?.touched"
+                            class="text-red-500">Número do documento é obrigatório.</small>
+                          <small
+                            *ngIf="cardPaymentForm.get('cardholderDocNumber')?.hasError('invalidCPF') && cardPaymentForm.get('cardholderDocNumber')?.touched && !cardPaymentForm.get('cardholderDocNumber')?.hasError('required')"
+                            class="text-red-500">CPF inválido.</small>
+                          <!-- Adicionar outras validações de documento se necessário -->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="navigation-buttons flex justify-content-between align-items-center mt-6">
+                  <button pButton type="button" label="Voltar para Dados" icon="pi pi-arrow-left"
+                    (click)="goToParticipantDetails()" class="p-button-secondary"></button>
+                  <button pButton type="button" label="Finalizar Inscrição" icon="pi pi-check" iconPos="right"
+                    (click)="finalizeRegistration()"
+                    [disabled]="!selectedPaymentMethod || cpfLoading || (selectedPaymentMethod === 'card' && cardPaymentForm.invalid)"
+                    class="p-button-primary"></button>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </p-step-panel>
+
+        <!-- ETAPA 3: CONFIRMAÇÃO FINAL -->
+        <p-step-panel [value]="3">
+          <ng-template #content>
+            <div class="text-center py-8">
+              <h2 class="text-xl font-bold mb-4">Inscrição Confirmada!</h2>
+              <p class="mb-4">Sua inscrição foi processada e um e-mail de confirmação foi enviado (simulação).</p>
+              <p class="mb-6">Obrigado por se inscrever no evento: <strong>{{ evento.descricao }}</strong>!</p>
+              <p-button label="Nova Inscrição para este Evento" (onClick)="resetAndStayOnEvent()"
+                styleClass="p-button-outlined p-button-secondary mr-2">
+              </p-button>
+              <p-button label="Ver Outros Eventos" (onClick)="navigateToEventList()" styleClass="p-button-primary">
+              </p-button>
+            </div>
+          </ng-template>
+        </p-step-panel>
+      </p-step-panels>
+    </p-stepper>
+  </div>
+</div>
+
+<p-toast></p-toast>

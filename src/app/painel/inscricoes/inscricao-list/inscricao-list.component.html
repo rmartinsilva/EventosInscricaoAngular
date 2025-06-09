@@ -1,0 +1,69 @@
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+<div class="container mx-auto p-4">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-semibold">Lista de Inscrições</h2>
+    <button pButton label="Nova Inscrição" icon="pi pi-plus" (click)="novaInscricao()"></button>
+  </div>
+
+  <p-table #dtInscricoes [value]="inscricoes" [loading]="loading" 
+           [lazy]="true" (onLazyLoad)="carregarInscricoes($event)"
+           [paginator]="true" [rows]="rowsPerPage" [totalRecords]="totalRecords"
+           [rowsPerPageOptions]="[10, 15, 25, 50]" responsiveLayout="scroll"
+           dataKey="codigo" stateStorage="session" stateKey="inscricoes-table-state"
+           styleClass="p-datatable-striped p-datatable-gridlines mb-10">
+
+    <ng-template pTemplate="caption">
+      <div class="flex justify-between items-center">
+        <h4 class="m-0 text-lg">Gerenciar Inscrições</h4>
+        <div class="flex items-center ml-auto space-x-2"> 
+          <p-dropdown id="filtroEvento" [options]="eventosParaFiltro" [(ngModel)]="eventoSelecionadoFiltro"
+                      optionLabel="descricao" placeholder="Filtrar por Evento" [showClear]="true"
+                      (onChange)="aplicarFiltros()" styleClass="p-inputtext-sm" inputStyleClass="p-inputtext-sm"
+                      [style]="{minWidth: '200px'}"> 
+          </p-dropdown>
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" [(ngModel)]="filtroNomeParticipante" 
+                   placeholder="Buscar por nome..." (input)="aplicarFiltros()" class="p-inputtext-sm" 
+                   [style]="{minWidth: '200px'}" />
+          </span>
+          <button pButton icon="pi pi-filter-slash" 
+                  class="p-button-outlined p-button-sm" (click)="limparFiltros()" pTooltip="Limpar Filtros" tooltipPosition="top"></button>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Evento</th>
+        <th>Participante</th>
+        <th>Data Inscrição</th>
+        <th style="text-align: center;">Cortesia</th>
+        <th style="width: 10rem; text-align: center;">Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-inscricao>
+      <tr>
+        <td>{{ getNomeEvento(inscricao.evento) }}</td>
+        <td>{{ getNomeParticipante(inscricao.participante) }}</td>
+        <td>{{ inscricao.data | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td style="text-align: center;">
+            <i class="pi" [ngClass]="{'true': 'pi-check-circle text-green-500', 'false': 'pi-times-circle text-red-500'}[isCortesia(inscricao) ? 'true' : 'false']"
+               [pTooltip]="isCortesia(inscricao) ? 'Sim' : 'Não'" tooltipPosition="top"></i>
+        </td>
+        <td style="text-align: center;">
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info mr-2" 
+                  (click)="editarInscricao(inscricao.codigo)" pTooltip="Editar" tooltipPosition="top"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger" 
+                  (click)="confirmarExclusao(inscricao.codigo)" pTooltip="Excluir" tooltipPosition="top"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5">Nenhuma inscrição encontrada.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div> 
