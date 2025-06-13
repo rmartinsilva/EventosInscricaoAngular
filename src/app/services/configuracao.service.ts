@@ -26,7 +26,10 @@ export class ConfiguracaoService {
     // Enviamos apenas os campos que podem ser atualizados
     const updatePayload = {
         descricao_api: configuracao.descricao_api,
-        chave_api: configuracao.chave_api
+        chave_api: configuracao.chave_api,
+        token_api: configuracao.token_api,
+        webhooksecret: configuracao.webhooksecret,
+        notificationurl: configuracao.notificationurl
     };
     return this.http.put<Configuracao>(`${this.apiUrl}/${id}`, updatePayload);
   }

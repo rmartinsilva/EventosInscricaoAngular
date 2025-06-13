@@ -53,7 +53,10 @@ export class ConfiguracoesComponent implements OnInit {
   private initializeForm(): void {
     this.configForm = this.fb.group({
       descricao_api: ['', [Validators.required]],
-      chave_api: ['', [Validators.required]]
+      chave_api: ['', [Validators.required]],
+      token_api: ['', [Validators.required]],
+      webhooksecret: ['', [Validators.required]],
+      notificationurl: ['', [Validators.required]]
     });
   }
 
@@ -113,7 +116,10 @@ export class ConfiguracoesComponent implements OnInit {
           summary: 'Sucesso',
           detail: this.isEditMode ? 'Configuração atualizada com sucesso!' : 'Configuração salva com sucesso!'
         });
-        this.configForm.patchValue(savedConfig);
+        
+        // A resposta do backend não inclui os campos sensíveis por segurança.
+        // Então, não atualizamos o formulário com a resposta para não apagar os campos.
+        // Apenas marcamos como salvo (pristine).
         this.configForm.markAsPristine();
         this.isEditMode = true;
         this.configId = savedConfig.id ?? this.configId;

@@ -40,6 +40,48 @@
       </div>
     </div>
 
+    <!-- Campo Token da API -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="token_api">Token da API</label>
+      <input type="text"
+             id="token_api"
+             pInputText
+             formControlName="token_api"
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+             placeholder="Seu token da API">
+      <div class="mt-2">
+        <app-message [control]="configForm.get('token_api')" error="required" text="O token da API é obrigatório."></app-message>
+      </div>
+    </div>
+
+    <!-- Campo Webhook Secret -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="webhooksecret">Webhook Secret</label>
+      <input type="text"
+             id="webhooksecret"
+             pInputText
+             formControlName="webhooksecret"
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+             placeholder="Seu segredo do webhook">
+      <div class="mt-2">
+        <app-message [control]="configForm.get('webhooksecret')" error="required" text="O Webhook Secret é obrigatório."></app-message>
+      </div>
+    </div>
+
+    <!-- Campo URL de Notificação -->
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="notificationurl">URL de Notificação (Webhook)</label>
+      <input type="text"
+             id="notificationurl"
+             pInputText
+             formControlName="notificationurl"
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+             placeholder="https://.../webhook">
+      <div class="mt-2">
+        <app-message [control]="configForm.get('notificationurl')" error="required" text="A URL de Notificação é obrigatória."></app-message>
+      </div>
+    </div>
+
     <!-- Botão Salvar -->
     <div class="flex items-center justify-between mt-6">
       <button pButton
