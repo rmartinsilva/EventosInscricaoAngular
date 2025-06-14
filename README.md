@@ -1,38 +1,32 @@
-Projeto Front-end Angular para Inscrição em Evento ( Instancia-Angular )
+Projeto Angular 19 Para um sistema de inscrição em eventos é possivel inscrições cortesias por evento.
 
-Este projeto front-end, desenvolvido em Angular, tem como objetivo proporcionar uma experiência de inscrição intuitiva e eficiente para usuários interessados em participar de um evento específico. Ele consumirá uma API de backend para gerenciar os dados dos usuários, a busca por cadastros existentes e o processo de pagamento.
+Instruções para Utilizar o Sistema
 
-Funcionalidades do Sistema de Inscrição em Evento (Front-end Angular)
+instalar as dependências
+npm install
 
-Acesso à Página do Evento: Ao acessar a página específica de um evento, o usuário visualiza o formulário de cadastro.
+configurar a conexão com o backend no environment
 
-Busca de Cadastro por CPF: O campo CPF no formulário de cadastro é o único inicialmente habilitado. Ao digitar o CPF, o sistema consulta a API de backend para verificar se o usuário já possui um cadastro.
+Atualize o environments para a url de conexão com o backand
 
-Preenchimento Automático (Usuário Existente): Se o CPF for encontrado na API, os demais campos do formulário são automaticamente preenchidos com os dados do usuário, permanecendo desabilitados para edição nesta etapa. Um botão de "Prosseguir para Inscrição" é apresentado.
+url para o admin
+http://localhost:4200/painel/login
 
-Liberação de Campos para Novo Cadastro: Se o CPF não for encontrado, os demais campos do formulário são habilitados para que o usuário possa inserir suas informações de cadastro (nome, email, telefone, etc.). Um botão de "Cadastrar e Prosseguir" é apresentado.
+senha padrão setada no backend 
+usuario admin
+senha 102030
 
-Tela de Seleção de Pagamento: Após o cadastro (ou se o usuário já existia), o sistema navega para a tela de inscrição, onde o usuário pode escolher a forma de pagamento. As opções disponíveis são Pix, Cartão de Crédito e Cartão de Débito.
+ao cadastrar o evento o campo url é a url do evento, o sistema funciona por url ex:
+ao cadastar um evento com a url "eventoteste" o acesso seria
+http://localhost:4200/evento/inscricao/eventoteste, onde essa url é única.
 
-Geração de Código Pix: Ao selecionar a opção Pix, o front-end faz uma requisição para a API de backend, que retorna um código Pix (e possivelmente um QR Code) para o usuário efetuar o pagamento.
-
-Formulário de Dados de Cartão: Ao selecionar Cartão de Crédito ou Cartão de Débito, o front-end exibe os campos necessários para o usuário inserir os dados do cartão (número, nome do titular, validade, código de segurança).
-
-Confirmação de Inscrição Após Pagamento: Após o usuário realizar o pagamento (via Pix ou cartão), a API de backend notifica o front-end sobre a confirmação. O sistema então exibe uma tela de sucesso da inscrição para o usuário.
-
-Você tem toda a razão! Para complementar o funcionamento do backend:
-
-Retorno de Dados em JSON:
-
-É fundamental ressaltar que toda a comunicação do backend com o frontend será feita através de respostas no formato JSON (JavaScript Object Notation).
-
-Isso significa que:
-
-Quando o frontend enviar dados para o backend (por exemplo, dados de cadastro, solicitação de inscrição, credenciais de login), ele fará isso através de requisições HTTP (POST, GET, PUT, DELETE).
-O backend, ao processar essas requisições, formatará suas respostas (dados de usuários, informações de eventos, status de pagamento, tokens JWT, relatórios) como strings JSON.
-O frontend, por sua vez, receberá essas strings JSON e as interpretará para exibir as informações ao usuário ou para continuar o fluxo da aplicação.
-Essa padronização no formato JSON garante uma comunicação clara e eficiente entre o backend (PHP/Laravel) e qualquer aplicação frontend (como a nossa em Angular), permitindo que diferentes tecnologias interajam de forma consistente.
+o campo Link Página de Obrigado é o link que será redirecionado após fazer  inscrição a url completa.
 
 
-Essas são as funcionalidades principais que o front-end Angular irá implementar para o sistema de inscrição no evento, consumindo os serviços da API de backend para gerenciar os dados e o fluxo de pagamento.
+a Inscrição do participante é feita pelo link com a url ex:
+http://localhost:4200/evento/inscricao/eventoteste
 
+para efetuar inscrições "cortesia" previamente no cadastro do evento tem que estar marcado a opçaõ cortesia e definido o número de cortesias permitidas para o evento.
+a cortesia é cadastrada através do painel de admin, dentro do painel só é possível fazer a inscrição de um participante que já tenha cadastrado seus dados, o mesmo é feito na página principal do evento ao preencher um novo cpf, ao avançar ele já cadastra.
+
+Url para o Backand em Php + Laravel 12 https://github.com/rmartinsilva/EventosInscricaoPhp

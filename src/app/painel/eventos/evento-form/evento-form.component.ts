@@ -89,7 +89,7 @@ export class EventoFormComponent implements OnInit {
       cortesias: [false],
       numero_cortesia: [null],
       link_obrigado: ['', [Validators.required, Validators.pattern('https?://.+')]],
-      url: ['', [Validators.required, Validators.pattern('https?://.+')]],
+      url: ['', [Validators.required]],
       valor: [null, [Validators.required]]
     });
   }
@@ -144,12 +144,25 @@ export class EventoFormComponent implements OnInit {
     // Primeiro, processar o valor para ser um número ou null
     let valorNumerico: number | null = null;
     if (formValues.valor !== null && formValues.valor !== undefined && formValues.valor !== '') {
+      /*console.log('start do valor?');
+      console.log(formValues.valor);
       const valorStringLimpo = String(formValues.valor).replace(/[^0-9,.]/g, ''); // Remove R$, espaços, etc.
+      console.log('valorStringLimpo');
+      console.log(valorStringLimpo);  
       const valorFormatadoParaNumero = valorStringLimpo.replace(/[.]/g, '').replace(',', '.'); // Troca milhar por nada, e vírgula por ponto
-      valorNumerico = parseFloat(valorFormatadoParaNumero);
-      if (isNaN(valorNumerico)) {
-        valorNumerico = null; // Se não for um número válido, define como null
+      console.log('como estamos?');
+      console.log(valorFormatadoParaNumero);
+      valorNumerico = parseFloat(valorFormatadoParaNumero);*/
+      valorNumerico = formValues.valor;
+      console.log('valorNumerico');
+      console.log(valorNumerico);
+      
+      if(valorNumerico !== null && valorNumerico !== undefined) {
+        if (isNaN(valorNumerico)) {
+          valorNumerico = null; // Se não for um número válido, define como null
+        }
       }
+      
     }
 
     const payload: Partial<Evento> = {
@@ -158,7 +171,7 @@ export class EventoFormComponent implements OnInit {
       data_inicio_inscricoes: this.formatDateTimeToYYYYMMDDHHMMSS(formValues.data_inicio_inscricoes),
       data_final_inscricoes: this.formatDateTimeToYYYYMMDDHHMMSS(formValues.data_final_inscricoes),
       url_evento: formValues.url, 
-      valor: valorNumerico !== null ? parseFloat(valorNumerico.toFixed(2)) : null, // Garante duas casas decimais se não for nulo
+      valor: valorNumerico !== null ? valorNumerico.toFixed(2) : null, // Garante duas casas decimais se não for nulo
     };
     
     if (!payload.cortesias) {
