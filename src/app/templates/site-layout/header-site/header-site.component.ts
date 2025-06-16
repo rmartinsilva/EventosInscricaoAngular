@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './header-site.component.scss'
 })
 export class HeaderSiteComponent {
-  @Input() nomeEvento: string = 'Estancia Recanto de Paz'; // Receberá o nome do evento
+  @Input() nomeSistemaEvento: string = 'Sistema de Eventos';
 
   // Poderíamos ter um logo aqui
   logoUrl: string = 'assets/images/logo.png'; // Exemplo

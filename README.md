@@ -26,7 +26,9 @@ o campo Link Página de Obrigado é o link que será redirecionado após fazer  
 a Inscrição do participante é feita pelo link com a url ex:
 http://localhost:4200/evento/inscricao/eventoteste
 
-para efetuar inscrições "cortesia" previamente no cadastro do evento tem que estar marcado a opçaõ cortesia e definido o número de cortesias permitidas para o evento.
+para efetuar inscrições "cortesia" previamente no cadastro do evento tem que estar marcado a opção cortesia e definido o número de cortesias permitidas para o evento.
 a cortesia é cadastrada através do painel de admin, dentro do painel só é possível fazer a inscrição de um participante que já tenha cadastrado seus dados, o mesmo é feito na página principal do evento ao preencher um novo cpf, ao avançar ele já cadastra.
+
+no painel administrativo a opção Configurações devem ser preenchidas com as credenciais do Mercado Pago.
 
 Url para o Backand em Php + Laravel 12 https://github.com/rmartinsilva/EventosInscricaoPhp
