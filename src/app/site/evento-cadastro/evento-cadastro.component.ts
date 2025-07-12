@@ -1,10 +1,12 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EventoService } from '../../services/evento.service';
 import { ParticipanteService } from '../../services/participante.service';
 import { PagamentoService } from '../../services/pagamento.service';
 import { InscricaoService } from '../../services/inscricao.service';
 import { ListaEsperaService } from '../../services/lista-espera.service';
+import { ConfiguracaoService } from '../../services/configuracao.service'; // Importado
 import { Evento } from '../../shared/models/evento.model';
 import { Participante } from '../../shared/models/participante.model';
 import { Inscricao } from '../../shared/models/inscricao.model';
@@ -24,9 +26,10 @@ import { MessageModule } from 'primeng/message';
 import { debounceTime, distinctUntilChanged, switchMap, catchError, tap, takeWhile, finalize, delay, takeUntil } from 'rxjs/operators';
 import { Subject, EMPTY, of, timer, Subscription } from 'rxjs';
 import * as cardValidator from 'card-validator';
-import { loadMercadoPago } from '@mercadopago/sdk-js';
+// import { loadMercadoPago } from '@mercadopago/sdk-js'; // Removido para importação dinâmica
 import { ListaEspera, CriarListaEsperaPayload } from '../../shared/models/lista-espera.model';
 import { format, parseISO } from 'date-fns';
+// import { environment } from '../../../environments/environment'; // Removido
 
 declare var MercadoPago: any;
 
@@ -52,6 +55,8 @@ declare var MercadoPago: any;
   providers: [MessageService]
 })
 export class EventoCadastroComponent implements OnInit, OnDestroy {
+  private platformId = inject(PLATFORM_ID);
+  private configuracaoService = inject(ConfiguracaoService); // Injetado
   evento: Evento | null = null;
   loading = true;
   error: string | null = null;
@@ -197,7 +202,25 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.disableFormFields();
-    this.initializeMercadoPagoSDK();
+
+    if (isPlatformBrowser(this.platformId)) {
+      // Busca a configuração da API para obter a chave do Mercado Pago
+      this.configuracaoService.getConfiguracaoSite(1).subscribe({
+        next: (config) => {
+          if (config && config.chave_api) {
+            // Inicializa o SDK somente após obter a chave
+            this.initializeMercadoPagoSDK(config.chave_api);
+          } else {
+            console.error('Chave pública do Mercado Pago não encontrada na configuração.');
+            this.messageService.add({ severity: 'error', summary: 'Erro de Configuração', detail: 'O sistema de pagamento não está configurado corretamente.' });
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao buscar configuração:', err);
+          this.messageService.add({ severity: 'error', summary: 'Erro de Configuração', detail: 'Não foi possível carregar as configurações de pagamento.' });
+        }
+      });
+    }
 
     this.route.params.subscribe(params => {
       const urlEvento = params['urlEvento'];
@@ -263,40 +286,52 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
   }
 
   handleConditionalFields(): void {
-    const participanteIgreja = this.participanteForm.get('participante_igreja')?.value;
-    const usaMedicamento = this.participanteForm.get('usa_medicamento')?.value;
+    const participanteIgrejaControl = this.participanteForm.get('participante_igreja');
+    const qualIgrejaControl = this.participanteForm.get('qual_igreja');
+    const usaMedicamentoControl = this.participanteForm.get('usa_medicamento');
+    const qualMedicamentoControl = this.participanteForm.get('qual_medicamento');
 
-    if (participanteIgreja && this.canEditDetails) {
-      this.participanteForm.get('qual_igreja')?.enable();
-      this.participanteForm.get('qual_igreja')?.setValidators(Validators.required);
+    if (participanteIgrejaControl?.value) {
+      qualIgrejaControl?.setValidators([Validators.required]);
+      qualIgrejaControl?.enable();
     } else {
-      this.participanteForm.get('qual_igreja')?.disable();
-      this.participanteForm.get('qual_igreja')?.clearValidators();
+      qualIgrejaControl?.clearValidators();
+      qualIgrejaControl?.disable();
+      qualIgrejaControl?.setValue('');
     }
-    this.participanteForm.get('qual_igreja')?.updateValueAndValidity();
 
-    if (usaMedicamento && this.canEditDetails) {
-      this.participanteForm.get('qual_medicamento')?.enable();
-      this.participanteForm.get('qual_medicamento')?.setValidators(Validators.required);
+    if (usaMedicamentoControl?.value) {
+      qualMedicamentoControl?.setValidators([Validators.required]);
+      qualMedicamentoControl?.enable();
     } else {
-      this.participanteForm.get('qual_medicamento')?.disable();
-      this.participanteForm.get('qual_medicamento')?.clearValidators();
+      qualMedicamentoControl?.clearValidators();
+      qualMedicamentoControl?.disable();
+      qualMedicamentoControl?.setValue('');
     }
-    this.participanteForm.get('qual_medicamento')?.updateValueAndValidity();
+
+    qualIgrejaControl?.updateValueAndValidity();
+    qualMedicamentoControl?.updateValueAndValidity();
   }
+  
+  async initializeMercadoPagoSDK(publicKey: string): Promise<void> {
+    // A verificação de plataforma já é feita antes de chamar este método
+    if (!publicKey) {
+      console.error('Chave pública do Mercado Pago não fornecida.');
+      return;
+    }
 
-  async initializeMercadoPagoSDK(): Promise<void> {
     try {
+      const { loadMercadoPago } = await import('@mercadopago/sdk-js');
       await loadMercadoPago();
-      this.mp = new (window as any).MercadoPago('TEST-0ee5f147-f49e-4597-a3d0-3d45ab42ec13', {
+      
+      this.mp = new MercadoPago(publicKey, {
         locale: 'pt-BR'
       });
-      if (this.mp) {
-        this.getIdentificationTypes();
-      }
+
+      await this.getIdentificationTypes();
     } catch (error) {
       console.error('Erro ao inicializar o SDK do Mercado Pago:', error);
-      this.messageService.add({ severity: 'error', summary: 'Erro de Integração', detail: 'Falha ao carregar o sistema de pagamento. Tente recarregar a página.' });
+      this.messageService.add({ severity: 'error', summary: 'Erro no Pagamento', detail: 'Não foi possível carregar o módulo de pagamento. Tente recarregar a página.' });
     }
   }
 
@@ -658,14 +693,17 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
     this.eventoService.getEventoByUrl(urlEvento).subscribe({
-      next: (evento) => {
+      next: (evento: Evento) => {
         this.evento = evento;
         this.loading = false;
+        
+        // A inicialização do SDK foi movida para o ngOnInit
+        // e agora depende do serviço de configuração.
 
         if (this.evento && this.evento.codigo) {
           this.numeroMaximoInscricoes = this.evento.numero_inscricoes;
           this.inscricaoService.buscarNumeroInscricoesPorEvento(this.evento.codigo).subscribe({
-            next: (numero) => {          
+            next: (numero: { count: number }) => {          
               this.numeroInscricao = numero.count;
               if (this.participanteEncontrado && this.participanteEncontrado.codigo && this.evento && this.evento.codigo) {
                 this.buscarInscricaoExistente(this.evento.codigo, this.participanteEncontrado.codigo);
@@ -676,10 +714,10 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
           });
         }
       },
-      error: (error) => {
-        this.error = 'Erro ao carregar evento';
+      error: (err: any) => {
+        this.error = err?.error?.error || 'Erro ao carregar evento. Tente novamente mais tarde.';
         this.loading = false;
-        console.error('Erro ao carregar evento:', error);
+        console.error('Erro ao carregar evento:', err);
       }
     });
   }
@@ -932,18 +970,18 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
   async finalizeRegistration(): Promise<void> {
     if (this.selectedPaymentMethod === 'pix' && this.isPollingPixStatus) {
         this.messageService.add({ severity: 'info', summary: 'Aguardando Pagamento', detail: 'Aguardando confirmação do pagamento PIX. Verifique a tela ou seu app do banco.' });
-        return;
-    }    
+      return;
+    }
     if (this.selectedPaymentMethod === 'pix' && !this.isPollingPixStatus && this.pixPagamentoId) {
         this.messageService.add({ severity: 'info', summary: 'Verifique Status', detail: 'O PIX foi gerado. Se o pagamento foi feito, a confirmação será processada. Se expirou, gere um novo.' });
-        return;
+      return;
     }
 
     if (!this.selectedPaymentMethod) {
       this.messageService.add({ severity: 'warn', summary: 'Atenção', detail: 'Selecione um método de pagamento.' });
       return;
     }
-    
+
     this.messageService.add({ 
       severity: 'info', 
       summary: 'Processando Inscrição', 
@@ -979,13 +1017,13 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
           email: participanteData.email,
           identification: {
             type: cardData.cardholderDocType,
-            number: String(cardData.cardholderDocNumber).replace(/\\D/g, '')
+            number: String(cardData.cardholderDocNumber).replace(/\D/g, '')
           }
         }
       };
 
       this.pagamentoService.pagarComCartao(payload).subscribe({
-        next: (response) => {
+       next: (response: any) => {
           if (response && response.status === 'approved') {
            
             this.messageService.add({ 
@@ -994,20 +1032,14 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
               detail: 'Sua inscrição foi realizada com sucesso. Verifique seu e-mail para mais detalhes.' 
             });
 
-            setTimeout(() => {
-              this.activeStep = 3;
-              const linkObrigado = this.evento ? this.evento.link_obrigado : null;
-              this.resetFormsAndState(true);
-              if (linkObrigado) {
-                if (linkObrigado.startsWith('http://') || linkObrigado.startsWith('https://')) {
-                  window.location.href = linkObrigado;
-                } else {
-                  this.router.navigate([linkObrigado]); 
-                }
-              } else {
-                  this.router.navigate(['/']);
-              }
-            }, 2000); 
+            // setTimeout(() => {
+            //   this.activeStep = 3;
+            //   this.resetFormsAndState(true);
+            //   this.navigateToEventList(); // Navega para a lista de eventos após o sucesso
+            // }, 2000);
+            this.activeStep = 3;
+            this.resetFormsAndState(true);
+
           } else { 
                     
             this.messageService.clear('info');
@@ -1043,13 +1075,13 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
             }
 
             this.messageService.add({
-              severity: 'error',
+           severity: 'error',
               summary: 'Falha no Pagamento',
               detail: detailErrorMessage
             });
           }
         },
-        error: (err) => {
+        error: (err: any) => {
           this.messageService.clear('info');
           console.error('Erro ao processar pagamento com cartão:', err);
           let detailError = 'Falha ao processar o pagamento com cartão. Tente novamente.';

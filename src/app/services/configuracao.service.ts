@@ -10,10 +10,15 @@ import { environment } from '../../environments/environment';
 export class ConfiguracaoService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/painel/configuracoes`; // URL base da API
+  private apiUrlSite = `${environment.apiUrl}/configuracoes`; // URL base da API
 
   // Busca a configuração pelo ID (usaremos 1 por padrão)
   getConfiguracao(id: number): Observable<Configuracao | null> { // Permite retornar null se não encontrar
     return this.http.get<Configuracao>(`${this.apiUrl}/${id}`);
+  }
+
+  getConfiguracaoSite(id: number): Observable<Configuracao | null> { // Permite retornar null se não encontrar
+    return this.http.get<Configuracao>(`${this.apiUrlSite}/${id}`);
   }
 
   // Cria uma nova configuração

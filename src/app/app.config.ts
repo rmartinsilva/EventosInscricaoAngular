@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideClientHydration } from '@angular/platform-browser';
+import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor]), withFetch()),
     provideClientHydration(),
     provideAnimationsAsync(),
     providePrimeNG({
@@ -31,6 +31,6 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     ConfirmationService,
     { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },
-    JwtHelperService
+    JwtHelperService, provideClientHydration(withEventReplay())
   ]
 };
