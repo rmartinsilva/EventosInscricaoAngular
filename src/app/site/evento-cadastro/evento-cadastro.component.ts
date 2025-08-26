@@ -1001,6 +1001,13 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
         return;
       }
 
+      const paymentMethodId = this.getMercadoPagoPaymentMethodId(this.detectedCardBrand);
+      if (!paymentMethodId) {
+        this.messageService.clear('info');
+        this.messageService.add({ severity: 'warn', summary: 'Atenção', detail: 'Não foi possível identificar a bandeira do cartão.' });
+        return;
+      }
+
       const participanteData = this.participanteForm.getRawValue();
       const cardData = this.cardPaymentForm.getRawValue();
       const nomeCompleto = participanteData.nome || '';
@@ -1012,7 +1019,7 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
         descricao_pagamento: `Inscrição ${this.evento?.descricao} - ${nomeCompleto}`,
         card_token: cardToken,
         installments: 1,
-        payment_method_id: this.detectedCardBrand,
+        payment_method_id: paymentMethodId,
         payer: {
           email: participanteData.email,
           identification: {
@@ -1173,5 +1180,17 @@ export class EventoCadastroComponent implements OnInit, OnDestroy {
 
   private eventoCarregadoComVagas(): boolean {
     return !!(this.evento && this.evento.codigo && this.numeroInscricao !== null && this.numeroMaximoInscricoes !== null);
+  }
+
+  private getMercadoPagoPaymentMethodId(brand: string | null): string | null {
+    if (!brand) {
+      return null;
+    }
+    // Mapeia a bandeira do 'card-validator' para o ID do Mercado Pago
+    const brandMapping: { [key: string]: string } = {
+      'mastercard': 'master',
+      'american-express': 'amex'
+    };
+    return brandMapping[brand] || brand;
   }
 } 
